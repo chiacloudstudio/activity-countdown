@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chia Cloud Studio Countdown</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#fff7fa;font-family:Arial,sans-serif;color:#765c67}
+.widget{width:100%;max-width:380px;margin:20px auto;padding:30px 25px;background:#fff;border-radius:28px;text-align:center;box-shadow:0 8px 25px rgba(180,130,150,.15)}
+.cloud{font-size:30px;margin-bottom:8px}
+.title{font-size:15px;font-weight:bold;letter-spacing:3px;margin-bottom:18px;color:#765c67;word-wrap:break-word}
+.days{font-size:65px;line-height:1;font-weight:bold;color:#e8a8bc}
+.label{margin-top:8px;font-size:12px;letter-spacing:3px}
+.progress-container{width:100%;height:10px;margin-top:25px;background:#f5e5eb;border-radius:20px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:#e8a8bc;border-radius:20px;transition:width .5s ease}
+.percentage{margin-top:8px;font-size:12px}
+.date{margin-top:15px;font-size:12px;color:#a58f98}
+.edit-button{margin-top:20px;padding:10px 18px;border:0;border-radius:20px;background:#f7dce5;color:#765c67;cursor:pointer;font-size:12px}
+.settings{display:none;margin-top:20px;padding:20px;background:#fff7fa;border-radius:20px;text-align:left}
+.settings.show{display:block}
+.settings h3{margin-top:0;text-align:center;font-size:15px}
+.settings label{display:block;margin-top:12px;margin-bottom:5px;font-size:12px}
+.settings input{width:100%;padding:10px;border:1px solid #ead5dc;border-radius:12px;background:#fff;color:#765c67}
+.save-button{width:100%;margin-top:18px;padding:11px;border:0;border-radius:20px;background:#e8a8bc;color:#fff;cursor:pointer;font-weight:bold}
+.cancel-button{width:100%;margin-top:8px;padding:9px;border:0;background:transparent;color:#a58f98;cursor:pointer;font-size:12px}
+</style>
+</head>
+<body>
+<div class="widget">
+<div class="cloud">☁️</div>
+<div class="title" id="title">MY COUNTDOWN</div>
+<div class="days" id="days">21</div>
+<div class="label">DAYS TO GO</div>
+<div class="progress-container"><div class="progress-bar" id="progress"></div></div>
+<div class="percentage" id="percentage">0%</div>
+<div class="date" id="date">September 30, 2026</div>
+<button class="edit-button" onclick="openSettings()">⚙️ Edit Widget</button>
+<div class="settings" id="settings">
+<h3>✨ Customize</h3>
+<label>Countdown Title</label>
+<input type="text" id="titleInput" placeholder="MY COUNTDOWN" maxlength="40">
+<label>Countdown Start Date</label>
+<input type="date" id="startInput">
+<label>Target / Event Date</label>
+<input type="date" id="examInput">
+<button class="save-button" onclick="saveSettings()">Save Changes ♡</button>
+<button class="cancel-button" onclick="closeSettings()">Cancel</button>
+</div>
+</div>
+<script>
+const DEFAULT_TITLE="MY COUNTDOWN",DEFAULT_START="2026-09-01",DEFAULT_EXAM="2026-09-30";
+let title=localStorage.getItem("chiaTitle")||DEFAULT_TITLE;
+let startDateString=localStorage.getItem("chiaStart")||DEFAULT_START;
+let examDateString=localStorage.getItem("chiaExam")||DEFAULT_EXAM;
+function updateWidget(){
+const now=new Date(),startDate=new Date(startDateString+"T00:00:00"),examDate=new Date(examDateString+"T23:59:59");
+const daysLeft=Math.max(0,Math.ceil((examDate-now)/(1000*60*60*24)));
+const totalTime=examDate-startDate,elapsedTime=now-startDate;
+let progress=totalTime<=0?100:(elapsedTime/totalTime)*100;
+progress=Math.min(100,Math.max(0,progress));
+document.getElementById("title").textContent=title;
+document.getElementById("days").textContent=daysLeft;
+document.getElementById("progress").style.width=progress+"%";
+document.getElementById("percentage").textContent=Math.round(progress)+"%";
+document.getElementById("date").textContent=examDate.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+}
+function openSettings(){
+document.getElementById("settings").classList.add("show");
+document.getElementById("titleInput").value=title;
+document.getElementById("startInput").value=startDateString;
+document.getElementById("examInput").value=examDateString;
+}
+function closeSettings(){document.getElementById("settings").classList.remove("show")}
+function saveSettings(){
+const newTitle=document.getElementById("titleInput").value.trim(),newStart=document.getElementById("startInput").value,newExam=document.getElementById("examInput").value;
+if(!newStart||!newExam){alert("Please choose both dates.");return}
+if(new Date(newExam)<new Date(newStart)){alert("The target date must be after the start date.");return}
+title=newTitle||DEFAULT_TITLE;startDateString=newStart;examDateString=newExam;
+localStorage.setItem("chiaTitle",title);localStorage.setItem("chiaStart",startDateString);localStorage.setItem("chiaExam",examDateString);
+updateWidget();closeSettings();
+}
+updateWidget();setInterval(updateWidget,60000);
+</script>
+</body>
+</html>
